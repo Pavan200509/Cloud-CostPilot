@@ -1,0 +1,13 @@
+{
+  "users": [
+    {
+      "id": "ee871368fd776551",
+      "email": "demo@example.com",
+      "name": "Demo",
+      "salt": "016991a0886ba054",
+      "password_hash": "b89a8746bca44f6b10867a70fea0b820fcc36d2f1d3a33775002a14a91032e5b",
+      "cloud": null,
+      "gcp_project_id": "project-d42c8163-630e-4eb2-bbd"
+    }
+  ]
+}

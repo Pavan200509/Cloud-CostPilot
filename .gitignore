@@ -1,0 +1,21 @@
+.env
+\_\_pycache\_\_/
+\*.pyc
+.pytest_cache/
+.venv/
+venv/
+backend/data/
+node_modules/
+frontend/dist/
+.terraform/
+\*.tfstate\*
+.DS_Store
+*# Environment variables and secrets*
+.env\*
+!.env.example
+\*\*/.env\*
+!\*\*/.env.example
+
+*# Service account credentials*
+\*-key.json
+\*service-account\*.json

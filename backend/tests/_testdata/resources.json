@@ -1,0 +1,47 @@
+{
+  "project_id": "demo-cloudops",
+  "items": [
+    {
+      "resource_id": "demo-cloudops/zones/us-central1-a/instances/web-01",
+      "name": "web-01",
+      "project_id": "demo-cloudops",
+      "zone": "us-central1-a",
+      "machine_type": "e2-standard-4",
+      "status": "RUNNING",
+      "cpu_cores": 4,
+      "memory_gb": 16,
+      "cpu_utilization_pct": 12.0,
+      "memory_utilization_pct": 28.0,
+      "disk_utilization_pct": 35.0,
+      "observed_at": "2026-10-08T20:16:01.761168+00:00"
+    },
+    {
+      "resource_id": "demo-cloudops/zones/us-central1-a/instances/batch-01",
+      "name": "batch-01",
+      "project_id": "demo-cloudops",
+      "zone": "us-central1-a",
+      "machine_type": "e2-standard-2",
+      "status": "RUNNING",
+      "cpu_cores": 2,
+      "memory_gb": 8,
+      "cpu_utilization_pct": 68.0,
+      "memory_utilization_pct": 55.0,
+      "disk_utilization_pct": 42.0,
+      "observed_at": "2026-10-08T20:16:01.761182+00:00"
+    },
+    {
+      "resource_id": "demo-cloudops/zones/us-central1-b/instances/idle-db",
+      "name": "idle-db",
+      "project_id": "demo-cloudops",
+      "zone": "us-central1-b",
+      "machine_type": "e2-highmem-4",
+      "status": "RUNNING",
+      "cpu_cores": 4,
+      "memory_gb": 32,
+      "cpu_utilization_pct": 6.0,
+      "memory_utilization_pct": 18.0,
+      "disk_utilization_pct": 22.0,
+      "observed_at": "2026-10-08T20:16:01.761187+00:00"
+    }
+  ]
+}

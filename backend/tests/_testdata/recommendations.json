@@ -1,0 +1,29 @@
+[
+  {
+    "resource_id": "demo-cloudops/zones/us-central1-a/instances/web-01",
+    "resource_name": "web-01",
+    "finding_type": "underutilized_cpu",
+    "severity": "medium",
+    "recommendation": "Consider downsizing web-01 because CPU utilization has remained low (~12.0%). Current machine type: e2-standard-4. Review workload needs before changing size.",
+    "provider": "mock",
+    "actionable_by_platform": false
+  },
+  {
+    "resource_id": "demo-cloudops/zones/us-central1-b/instances/idle-db",
+    "resource_name": "idle-db",
+    "finding_type": "underutilized_cpu",
+    "severity": "medium",
+    "recommendation": "Consider downsizing idle-db because CPU utilization has remained low (~6.0%). Current machine type: e2-highmem-4. Review workload needs before changing size.",
+    "provider": "mock",
+    "actionable_by_platform": false
+  },
+  {
+    "resource_id": "demo-cloudops/zones/us-central1-b/instances/idle-db",
+    "resource_name": "idle-db",
+    "finding_type": "underutilized_memory",
+    "severity": "low",
+    "recommendation": "Consider a smaller memory footprint for idle-db (memory ~18.0%). Current machine type: e2-highmem-4.",
+    "provider": "mock",
+    "actionable_by_platform": false
+  }
+]

@@ -1,0 +1,32 @@
+
+services:
+  backend:
+    build: ./backend
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: /tmp/gcp-adc.json
+      DISCOVERY_MODE: live
+      STORAGE_BACKEND: local
+      AI_PROVIDER: gemini
+      DATA_DIR: /app/data
+      CORS_ORIGINS: "http://localhost:8080,http://localhost:5173"
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-2.0-flash-lite}
+      GCP_PROJECT_ID: ${GCP_PROJECT_ID:-}
+    volumes:
+      - costpilot-data:/app/data
+      - type: bind
+        source: ${APPDATA}/gcloud/application_default_credentials.json
+        target: /tmp/gcp-adc.json
+        read_only: true
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+
+volumes:
+  costpilot-data:
