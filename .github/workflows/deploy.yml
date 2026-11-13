@@ -1,0 +1,64 @@
+
+name: deploy
+
+on:
+  workflow_run:
+    workflows: ["ci"]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' }}
+    runs-on: ubuntu-latest
+
+    env:
+      PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+      REGION: ${{ secrets.GCP_REGION }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Authenticate with GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Setup Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Configure Docker authentication
+        run: |
+          gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
+
+      - name: Build Docker image
+        run: |
+          IMAGE="${REGION}-docker.pkg.dev/${PROJECT_ID}/cloudcostpilot/cloudcostpilot-api:${GITHUB_SHA}"
+          echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
+          docker build -t "$IMAGE" -f backend/Dockerfile backend
+
+      - name: Push image to Artifact Registry
+        run: |
+          docker push "$IMAGE"
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy cloudcostpilot-api \
+            --image "$IMAGE" \
+            --region "$REGION" \
+            --platform managed \
+            --service-account "cloudops-runtime@${PROJECT_ID}.iam.gserviceaccount.com" \
+            --allow-unauthenticated \
+            --port 8000 \
+            --memory 512Mi \
+            --cpu 1 \
+            --set-env-vars "^@^DISCOVERY_MODE=live@AI_PROVIDER=gemini@STORAGE_BACKEND=local@GEMINI_API_KEY=${GEMINI_API_KEY}"
