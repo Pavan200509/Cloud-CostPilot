@@ -1,21 +1,37 @@
+
+# Environment variables and secrets
 .env
-\_\_pycache\_\_/
-\*.pyc
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+
+# Python
+__pycache__/
+*.pyc
 .pytest_cache/
 .venv/
 venv/
+
+# Backend data
 backend/data/
+
+# Frontend
 node_modules/
 frontend/dist/
-.terraform/
-\*.tfstate\*
-.DS_Store
-*# Environment variables and secrets*
-.env\*
-!.env.example
-\*\*/.env\*
-!\*\*/.env.example
 
-*# Service account credentials*
-\*-key.json
-\*service-account\*.json
+# Terraform
+.terraform/
+*.tfstate*
+*.tfplan
+crash.log
+
+# Service account credentials
+*-key.json
+*service-account*.json
+*.pem
+*.p12
+
+# System files
+.DS_Store
