@@ -1,5 +1,3 @@
-test_analyzer.py
-
 from app.analyzer.rules import analyze_resources
 from app.config import Settings
 
