@@ -7,7 +7,6 @@ on:
     types: [completed]
     branches: [main]
 
-
 permissions:
   contents: read
   id-token: write
@@ -16,13 +15,30 @@ jobs:
   deploy:
     if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     env:
       PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
       REGION: ${{ secrets.GCP_REGION }}
+      DEPLOYER_SA: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      WIF_PROVIDER: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      SOURCE_SHA: ${{ github.event.workflow_run.head_sha }}
 
     steps:
+      - name: Validate GitHub Secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          for secret_name in PROJECT_ID REGION DEPLOYER_SA WIF_PROVIDER GEMINI_API_KEY; do
+            if [ -z "${!secret_name:-}" ]; then
+              echo "::error::$secret_name is missing or empty"
+              exit 1
+            fi
+            echo "$secret_name is available"
+          done
+
       - name: Checkout source code
         uses: actions/checkout@v4
         with:
@@ -36,32 +52,54 @@ jobs:
 
       - name: Setup Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
-        with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Verify GCP Service Account
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "Checking GCP project..."
+          gcloud projects describe "$PROJECT_ID" \
+            --format="value(projectId)"
+
+          echo "Checking GitHub Actions service account..."
+          gcloud iam service-accounts describe "$DEPLOYER_SA" \
+            --project="$PROJECT_ID" \
+            --format="value(email)"
 
       - name: Configure Docker authentication
         run: |
           gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
 
       - name: Build Docker image
+        shell: bash
         run: |
-          IMAGE="${REGION}-docker.pkg.dev/${PROJECT_ID}/cloudcostpilot/cloudcostpilot-api:${GITHUB_SHA}"
+          set -euo pipefail
+
+          IMAGE="${REGION}-docker.pkg.dev/${PROJECT_ID}/cloudcostpilot/cloudcostpilot-api:${SOURCE_SHA}"
+
           echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
-          docker build -t "$IMAGE" -f backend/Dockerfile backend
+
+          docker build \
+            -t "$IMAGE" \
+            -f backend/Dockerfile \
+            backend
 
       - name: Push image to Artifact Registry
         run: |
           docker push "$IMAGE"
 
       - name: Deploy to Cloud Run
+        shell: bash
         run: |
           gcloud run deploy cloudcostpilot-api \
-            --image "$IMAGE" \
-            --region "$REGION" \
-            --platform managed \
-            --service-account "cloudops-runtime@${PROJECT_ID}.iam.gserviceaccount.com" \
+            --project="$PROJECT_ID" \
+            --image="$IMAGE" \
+            --region="$REGION" \
+            --platform=managed \
+            --service-account="cloudops-runtime@${PROJECT_ID}.iam.gserviceaccount.com" \
             --allow-unauthenticated \
-            --port 8000 \
-            --memory 512Mi \
-            --cpu 1 \
-            --set-env-vars "^@^DISCOVERY_MODE=live@AI_PROVIDER=gemini@STORAGE_BACKEND=local@GEMINI_API_KEY=${GEMINI_API_KEY}"
+            --port=8000 \
+            --memory=512Mi \
+            --cpu=1 \
+            --set-env-vars="^@^DISCOVERY_MODE=live@AI_PROVIDER=gemini@STORAGE_BACKEND=local@GEMINI_API_KEY=${GEMINI_API_KEY}"
