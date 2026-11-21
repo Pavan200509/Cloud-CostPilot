@@ -1,4 +1,4 @@
-const BASE = import.meta.env.VITE_API_BASE || "/api";
+const BASE = import.meta.env.DEV ? "/api" : "";
 const TOKEN_KEY = "Cloud CostPilot_token";
 
 export function getToken() {
