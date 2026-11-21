@@ -83,7 +83,7 @@ jobs:
           docker build \
             -t "$IMAGE" \
             -f backend/Dockerfile \
-            backend
+            .
 
       - name: Push image to Artifact Registry
         run: |

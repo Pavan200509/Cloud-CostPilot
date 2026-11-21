@@ -47,12 +47,14 @@ def create_app() -> FastAPI:
     app.include_router(router)
 
     # Product UI at /  — Swagger stays at /docs for developers only.
+    # Serve production React/Vite frontend.
+    # API routes are registered before this fallback.
     if STATIC_DIR.is_dir():
-        app.mount("/assets", StaticFiles(directory=STATIC_DIR), name="assets")
-
-        @app.get("/", include_in_schema=False)
-        def spa_root() -> FileResponse:
-            return FileResponse(STATIC_DIR / "index.html")
+        app.mount(
+            "/",
+            StaticFiles(directory=STATIC_DIR, html=True),
+            name="frontend",
+        )
 
     return app
 
